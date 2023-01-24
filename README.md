@@ -1,2 +1,2 @@
 # golang-fiber-postgre-gorm
-Golang Backend with Framework Fiber, using GORM and Postgresql
+Type Safe Golang Backend with Framework Fiber, using GORM and Postgresql
