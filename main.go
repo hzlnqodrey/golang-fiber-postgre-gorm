@@ -1,8 +1,8 @@
 package main
 
 import (
-	"github.com/hzlnqodrey/go_rest_api/database"
-	"github.com/hzlnqodrey/go_rest_api/router"
+	"github.com/hzlnqodrey/golang-fiber-postgre-gorm/database"
+	"github.com/hzlnqodrey/golang-fiber-postgre-gorm/router"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/gofiber/fiber/v2/middleware/logger"
