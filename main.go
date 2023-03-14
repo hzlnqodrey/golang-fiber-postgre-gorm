@@ -2,6 +2,7 @@ package main
 
 import (
 	"github.com/gofiber/fiber/v2"
+	"github.com/hzlnqodrey/golang-fiber-postgre-gorm/models"
 	"github.com/joho/godotenv"
 	"gorm.io/gorm"
 )
@@ -19,6 +20,7 @@ type Repository struct {
 }
 
 // Book Controller
+// Create BOok Controller
 func (r *Repository) CreateBook(context *fiber.Ctx) error {
 	book := Book{}
 
@@ -51,6 +53,30 @@ func (r *Repository) CreateBook(context *fiber.Ctx) error {
 	)
 
 	return nil
+}
+
+// Get Books Controller
+func (r *Repository) GetBooks(c *fiber.Ctx) error {
+	booksModels := &[]models.Books{}
+
+	err := r.DB.Find(booksModels).Error
+
+	if err != nil {
+		c.Status(fiber.StatusBadRequest).JSON(
+			&fiber.Map{
+				"message": "Could not get books",
+			},
+		)
+		return err
+	}
+
+	c.Status(fiber.StatusOK).JSON(
+		&fiber.Map{
+			"message": "Book fetched successfully",
+		},
+	)
+
+	return nil	
 }
 
 // setup router method
