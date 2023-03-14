@@ -1,4 +1,4 @@
-package storage
+package models
 
 import (
 	"fmt"
@@ -25,8 +25,11 @@ func NewConnection(config *Config) (*gorm.DB, error) {
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 
 	if err != nil {
-		return db, err
+		panic(err)
 	}
 	
+	// IF Conn success, Create BOOK Table
+	db.AutoMigrate(&Books{})
+
 	return db, err 
 }
