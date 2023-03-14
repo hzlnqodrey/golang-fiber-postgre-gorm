@@ -6,10 +6,11 @@ import (
 
 // Books Model
 type Books struct {
-	ID			uint	`gorm:"primary key; autoIncrement" json:"id"`
-	Author		*string	`json:"author"`
-	Title		*string `json:"title"`
-	Publisher 	*string `json:"publisher"`
+	ID				uint	`gorm:"primaryKey; autoIncrement" json:"id"`
+	Title			*string `gorm:"type:varchar(300)" json:"title"`
+	Description		*string `gorm:"type:text" json:"description"`
+	Author			*string	`gorm:"type:varchar(300)" json:"author"`
+	PublishDate 	*string `gorm:"type:date" json:"publish_date"`
 }
 
 // Export Book
