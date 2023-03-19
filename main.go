@@ -1,8 +1,13 @@
 package main
 
 import (
+	"fmt"
+	"net/http"
+	"os"
+
 	"github.com/gofiber/fiber/v2"
 	"github.com/hzlnqodrey/golang-fiber-postgre-gorm/models"
+	"github.com/hzlnqodrey/golang-fiber-postgre-gorm/storage"
 	"github.com/joho/godotenv"
 	"gorm.io/gorm"
 )
@@ -55,6 +60,80 @@ func (r *Repository) CreateBook(context *fiber.Ctx) error {
 	return nil
 }
 
+func (r *Repository) DeleteBook(c *fiber.Ctx) error {
+	booksModels := models.Books{}
+	id := c.Params("id")
+
+	if id == "" {
+		c.Status(http.StatusInternalServerError).JSON(
+			&fiber.Map{
+				"message": "id cannot be empty",
+			})
+
+		return nil
+	}
+
+	err := r.DB.Delete(booksModels, id)
+
+	if err.Error != nil {
+		c.Status(http.StatusBadRequest).JSON(
+			&fiber.Map{
+				"message": "could not delete book",
+			})
+
+		return err.Error
+	}
+
+	// "successfull message"
+	c.Status(http.StatusOK).JSON(
+		&fiber.Map{
+			"message": "books deleted successfully",
+		},
+	)
+
+	return nil
+}
+
+// get books by id
+func (r *Repository) GetBookByID(c *fiber.Ctx) error {
+	booksModels := models.Books{}
+	id := c.Params("id")
+
+	if id == "" {
+		c.Status(http.StatusInternalServerError).JSON(
+			&fiber.Map{
+				"message": "id cannot be empty",
+			},
+		)
+
+		return nil
+	}
+
+	fmt.Println("The ID is ", id)
+
+	err := r.DB.Where("id = ?", id).First(booksModels).Error
+
+	if err != nil {
+		c.Status(http.StatusBadRequest).JSON(
+			&fiber.Map{
+				"message": "could not get the books ",
+			},
+		)
+
+		return err
+	}
+
+	// everything when well
+	c.Status(http.StatusOK).JSON(
+		&fiber.Map{
+			"message": "book id fetched successfully/",
+			"data":    booksModels,
+		},
+	)
+
+	return nil
+}
+
 // Get Books Controller
 func (r *Repository) GetBooks(c *fiber.Ctx) error {
 	booksModels := &[]models.Books{}
@@ -73,10 +152,11 @@ func (r *Repository) GetBooks(c *fiber.Ctx) error {
 	c.Status(fiber.StatusOK).JSON(
 		&fiber.Map{
 			"message": "Book fetched successfully",
+			"data":    booksModels,
 		},
 	)
 
-	return nil	
+	return nil
 }
 
 // setup router method
@@ -96,11 +176,26 @@ func main() {
 		panic(err)
 	}
 
+	config := &storage.Config{
+		Host:     os.Getenv("DB_HOST"),
+		Port:     os.Getenv("DB_PORT"),
+		Password: os.Getenv("DB_PASS"),
+		User:     os.Getenv("DB_USER"),
+		SSLMode:  os.Getenv("DB_SSLMODE"),
+		DBname:   os.Getenv("DB_NAME"),
+	}
+
 	// DB Config
 	db, err := storage.NewConnection(config)
 
 	if err != nil {
 		panic("Could not load to database")
+	}
+
+	err = models.MigrateBooks(db)
+
+	if err != nil {
+		panic("could not migrate db")
 	}
 
 	// Fiber and App routing
