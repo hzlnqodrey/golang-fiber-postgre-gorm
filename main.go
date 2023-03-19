@@ -94,10 +94,35 @@ func (r *Repository) DeleteBook(c *fiber.Ctx) error {
 	return nil
 }
 
+// Get Books Controller
+func (r *Repository) GetBooks(c *fiber.Ctx) error {
+	booksModels := &[]models.Books{}
+
+	err := r.DB.Find(booksModels).Error
+
+	if err != nil {
+		c.Status(fiber.StatusBadRequest).JSON(
+			&fiber.Map{
+				"message": "Could not get books",
+			},
+		)
+		return err
+	}
+
+	c.Status(fiber.StatusOK).JSON(
+		&fiber.Map{
+			"message": "Book fetched successfully",
+			"data":    booksModels,
+		},
+	)
+
+	return nil
+}
+
 // get books by id
 func (r *Repository) GetBookByID(c *fiber.Ctx) error {
-	booksModels := models.Books{}
 	id := c.Params("id")
+	booksModels := &models.Books{}
 
 	if id == "" {
 		c.Status(http.StatusInternalServerError).JSON(
@@ -134,31 +159,6 @@ func (r *Repository) GetBookByID(c *fiber.Ctx) error {
 	return nil
 }
 
-// Get Books Controller
-func (r *Repository) GetBooks(c *fiber.Ctx) error {
-	booksModels := &[]models.Books{}
-
-	err := r.DB.Find(booksModels).Error
-
-	if err != nil {
-		c.Status(fiber.StatusBadRequest).JSON(
-			&fiber.Map{
-				"message": "Could not get books",
-			},
-		)
-		return err
-	}
-
-	c.Status(fiber.StatusOK).JSON(
-		&fiber.Map{
-			"message": "Book fetched successfully",
-			"data":    booksModels,
-		},
-	)
-
-	return nil
-}
-
 // setup router method
 func (r *Repository) SetupRoutes(app *fiber.App) {
 	api := app.Group("/api")
@@ -177,7 +177,7 @@ func main() {
 	}
 
 	config := &storage.Config{
-		Host:     os.Getenv("DB_HOST"),
+		Host:     os.Getenv("DB_HOSTNAME"),
 		Port:     os.Getenv("DB_PORT"),
 		Password: os.Getenv("DB_PASS"),
 		User:     os.Getenv("DB_USER"),
